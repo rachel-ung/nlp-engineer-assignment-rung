@@ -1,9 +1,12 @@
 import numpy as np
 import os
 import uvicorn
+import torch
 
+
+# /src/nlp_engineer_assignment
 from nlp_engineer_assignment import count_letters, print_line, read_inputs, \
-    score, train_classifier
+    score, train_classifier, test_classifier
 
 
 def train_model():
@@ -23,8 +26,11 @@ def train_model():
     train_inputs = read_inputs(
         os.path.join(cur_dir, "data", "train.txt")
     )
-
-    model = train_classifier(train_inputs)
+    
+    
+    model = train_classifier(train_inputs, vocabs, batch_size=32, EPOCHS=10)
+    # model = train_classifier(train_inputs, vocabs, batch_size=32, EPOCHS=1)
+    torch.save(model.state_dict(), "trained_model")
 
     ###
     # Test
@@ -37,8 +43,13 @@ def train_model():
     # TODO: Extract predictions from the model and save it to a
     # variable called `predictions`. Observe the shape of the
     # example random predictions.
+    # golds = np.stack([count_letters(text) for text in test_inputs])
+    # predictions = np.random.randint(0, 3, size=golds.shape)
+
     golds = np.stack([count_letters(text) for text in test_inputs])
-    predictions = np.random.randint(0, 3, size=golds.shape)
+    predictions = test_classifier(model, test_inputs=test_inputs, vocabulary=vocabs)
+
+
 
     # Print the first five inputs, golds, and predictions for analysis
     for i in range(5):
